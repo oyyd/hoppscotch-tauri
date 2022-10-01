@@ -9,6 +9,7 @@ use serde_json;
 use std::collections::HashMap;
 use std::default::Default;
 use std::env;
+use std::io::Read;
 use std::string::String;
 use std::{convert::Infallible, net::SocketAddr};
 use url::Url;
@@ -76,6 +77,14 @@ async fn request_with_err(hopp_req: HoppRequest) -> HoppResponse {
   }
 }
 
+async fn read_body_to_end(body: &mut hyper::Body) -> Result<Vec<u8>> {
+  let body = hyper::body::aggregate(body).await?;
+  let mut reader = body.reader();
+  let mut body = Vec::<u8>::new();
+  reader.read_to_end(&mut body)?;
+  Ok(body)
+}
+
 async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
   log::debug!("request params: {:?}", hopp_req);
   let mut url = Url::parse(hopp_req.url.as_str()).unwrap();
@@ -137,15 +146,13 @@ async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
   if hopp_req.wants_binary.is_some() && hopp_req.wants_binary.unwrap() {
     hopp_resp.is_binary = Some(true);
     let body = resp.body_mut();
-    let body = hyper::body::aggregate(body).await?;
-    let c = body.chunk();
-    hopp_resp.data = Some(base64::encode(c));
+    let body = read_body_to_end(body).await?;
+    hopp_resp.data = Some(base64::encode(&body));
   } else {
     hopp_resp.is_binary = Some(false);
     let body = resp.body_mut();
-    let body = hyper::body::aggregate(body).await?;
-    let c = body.chunk();
-    hopp_resp.data = Some(String::from_utf8(c.to_vec())?);
+    let body = read_body_to_end(body).await?;
+    hopp_resp.data = Some(String::from_utf8(body)?);
   }
 
   Ok(hopp_resp)
@@ -179,9 +186,9 @@ async fn handle_req(mut req: hyper::Request<hyper::Body>) -> Result<hyper::Respo
 
   let hopp_req: HoppRequest = {
     let body = req.body_mut();
-    let buf = hyper::body::aggregate(body).await?;
+    let buf = read_body_to_end(body).await?;
 
-    serde_json::from_slice(buf.chunk())?
+    serde_json::from_slice(&buf)?
   };
 
   let hopp_resp = request_with_err(hopp_req).await;
