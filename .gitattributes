@@ -1,1 +1,1 @@
-src linguist-detectable=false
+src/**/*.* linguist-detectable=false
