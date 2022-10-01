@@ -2787,6 +2787,7 @@ name = "tauri-app"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "base64",
  "futures",
  "hyper",
  "serde",
@@ -2794,6 +2795,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tokio",
+ "url",
 ]
 
 [[package]]

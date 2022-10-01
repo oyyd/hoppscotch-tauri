@@ -21,6 +21,8 @@ hyper = { version = "0.14", features= ["server", "http1", "client", "tcp"] }
 tokio = { version = "1.21" }
 futures = { version = "0.3" }
 anyhow = { version = "1" }
+url = { version = "2" }
+base64 = {version = "0.13"}
 
 
 [features]

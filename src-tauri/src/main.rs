@@ -23,7 +23,7 @@ fn hopp_tauri() {
 fn main() {
     let rt = Runtime::new().expect("failed to initialize tokio rt");
 
-    rt.block_on(async {
+    rt.spawn(async {
         let (addr, start) = proxy::listen();
 
         println!("addr {:}", addr);
@@ -31,5 +31,5 @@ fn main() {
         start.await;
     });
 
-    // hopp_tauri()
+    hopp_tauri()
 }

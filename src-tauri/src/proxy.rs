@@ -1,13 +1,17 @@
+use anyhow::Result;
 use futures;
-use hyper::{self, http::{Method}, body::Buf};
-use std::{convert::Infallible, net::SocketAddr};
-use std::collections::HashMap;
-use serde_json;
+use hyper::header::HeaderName;
+use hyper::{self, body::Buf, http::Method};
 use serde;
-use std::string::String;
-use std::env;
+use serde_json;
+use std::collections::HashMap;
 use std::default::Default;
-use anyhow::{Result};
+use std::env;
+use std::str::FromStr;
+use std::string::String;
+use std::{convert::Infallible, net::SocketAddr};
+use url::Url;
+use base64;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 struct HoppAuth {
@@ -23,6 +27,7 @@ struct HoppRequest {
   method: String,
   access_token: String,
   auth: HoppAuth,
+  wants_binary: bool,
   headers: HashMap<String, String>,
   data: String,
   params: HashMap<String, String>,
@@ -56,9 +61,72 @@ async fn routes(req: hyper::Request<hyper::Body>) -> Result<hyper::Response<hype
   }
 }
 
-async fn handle_req(
-  mut req: hyper::Request<hyper::Body>,
-) -> Result<hyper::Response<hyper::Body>> {
+async fn request_with_err(hopp_req: HoppRequest) -> HoppResponse {
+  match request(hopp_req).await {
+    Ok(r) => r,
+    Err(e) => {
+      let mut hopp_resp = HoppResponse::default();
+
+      hopp_resp.success = false;
+      hopp_resp.data = Some(e.to_string());
+      hopp_resp
+    }
+  }
+}
+
+async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
+  let mut url = Url::parse(hopp_req.url.as_str()).unwrap();
+  let req_method = Method::from_bytes(&hopp_req.method.as_bytes())?;
+
+  // "params" into query string
+  for (key, value) in hopp_req.params.iter() {
+    let part = format!("{}={}", key.as_str(), value.as_str());
+    url.set_query(Some(part.as_str()));
+  }
+
+  let mut req = hyper::Request::builder()
+    .method(req_method)
+    .uri(url.to_string());
+
+  // headers
+  {
+    let h = req.headers_mut().unwrap();
+    for (key, val) in hopp_req.headers.iter() {
+      let key = HeaderName::from_bytes(key.as_bytes())?;
+      h.insert(key, val.parse().unwrap());
+    }
+
+    if h.get("content-length").is_none() {
+      h.insert("content-length", hopp_req.data.len().to_string().parse().unwrap());
+    }
+  }
+
+  let req = req.body(hyper::Body::from(hopp_req.body))?;
+
+  let cli = hyper::Client::new();
+
+  let mut resp = cli.request(req).await?;
+
+  let mut hopp_resp = HoppResponse::default();
+
+  if hopp_req.wants_binary {
+    hopp_resp.is_binary = Some(true);
+    let body = resp.body_mut();
+    let body = hyper::body::aggregate(body).await?;
+    let c = body.chunk();
+    hopp_resp.data = Some(base64::encode(c));
+  } else {
+    hopp_resp.is_binary = Some(false);
+    let body = resp.body_mut();
+    let body = hyper::body::aggregate(body).await?;
+    let c = body.chunk();
+    hopp_resp.data = Some(String::from_utf8(c.to_vec())?);
+  }
+
+  Ok(hopp_resp)
+}
+
+async fn handle_req(mut req: hyper::Request<hyper::Body>) -> Result<hyper::Response<hyper::Body>> {
   let method = req.method().clone();
 
   let mut resp = hyper::Response::builder();
@@ -70,7 +138,7 @@ async fn handle_req(
 
   // allow OPTIONS requests
   if method == Method::OPTIONS {
-    return Ok(resp.status(200).body(hyper::Body::empty())?)
+    return Ok(resp.status(200).body(hyper::Body::empty())?);
   }
 
   // For anything other than an POST request, we'll return an empty JSON object.
@@ -78,7 +146,7 @@ async fn handle_req(
     resp.headers_mut().map(|h| {
       h.insert("Content-Type", "application/json".parse().unwrap());
     });
-    let body = r#"{success:true,data:""}"#;
+    let body = r#"{"success":true,"data":""}"#;
     return Ok(resp.body(hyper::Body::from(body))?);
   }
 
@@ -89,20 +157,19 @@ async fn handle_req(
     serde_json::from_slice(buf.chunk())?
   };
 
+  let hopp_resp = request_with_err(hopp_req).await;
 
-  let resp = resp.body(hyper::Body::empty())?;
+  let data = serde_json::to_string(&hopp_resp)?;
+
+  let resp = resp.body(hyper::Body::from(data))?;
 
   Ok(resp)
 }
 
 pub fn listen() -> (SocketAddr, impl futures::Future<Output = ()>) {
   let port = match env::var("HOPP_PORT") {
-    Ok(env_port) => {
-      env_port.parse().unwrap()
-    }
-    Err(_) => {
-      0
-    }
+    Ok(env_port) => env_port.parse().unwrap(),
+    Err(_) => 0,
   };
 
   let addr = SocketAddr::from(([127, 0, 0, 1], port));
@@ -115,38 +182,9 @@ pub fn listen() -> (SocketAddr, impl futures::Future<Output = ()>) {
 
   let addr = server.local_addr();
 
-
   let start = async {
     let _result = server.await;
   };
 
   (addr, start)
 }
-
-// impl ProxyServer<T: hyper::service::Service> {
-//   // pub fn new() -> Self {
-//   //   ProxyServer {}
-//   // }
-
-//   pub async fn start() -> hyper::Result<()> {
-//     let addr = SocketAddr::from(([127, 0, 0, 1], 0));
-
-//     let make_service = hyper::service::make_service_fn(|conn| async {
-//       Ok::<_, Infallible>(hyper::service::service_fn(routes))
-//     });
-
-//     let server = hyper::Server::bind(&addr).serve(make_service);
-
-//     let addr = server.local_addr();
-
-//     server.await?;
-
-//     // futures::select! {
-//     //   err = server => {
-//     //     println!("hello");
-//     //   }
-//     // };
-
-//     Ok(())
-//   }
-// }
