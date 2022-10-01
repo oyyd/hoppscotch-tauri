@@ -1,10 +1,10 @@
 [package]
-name = "tauri-app"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+name = "hoppscotch-tauri"
+version = "0.1.0"
+description = "hoppscotch bundled with tauri with a rust proxy"
+authors = ["Ouyang Yadong <oyydoibh@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/oyyd/hoppscotch-tauri"
 edition = "2021"
 rust-version = "1.57"
 

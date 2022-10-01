@@ -1093,6 +1093,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "hoppscotch-tauri"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64",
+ "env_logger",
+ "futures",
+ "hyper",
+ "hyper-tls",
+ "lazy_static",
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tokio",
+ "url",
+]
+
+[[package]]
 name = "html5ever"
 version = "0.25.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2823,26 +2843,6 @@ dependencies = [
  "webkit2gtk",
  "webview2-com",
  "windows 0.39.0",
-]
-
-[[package]]
-name = "tauri-app"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64",
- "env_logger",
- "futures",
- "hyper",
- "hyper-tls",
- "lazy_static",
- "log",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tokio",
- "url",
 ]
 
 [[package]]
