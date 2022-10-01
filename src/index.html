@@ -6,4 +6,34 @@
   <body>
     <script data-n-head="1" data-hid="nuxt-color-mode-script" data-pbody="true">!function(){"use strict";var t=window,e=document,s=e.documentElement,a=["dark","light"],o=window.localStorage.getItem("nuxt-color-mode")||"system",c="system"===o?n():o,e=e.body.getAttribute("data-color-mode-forced");function r(e){e=""+e;s.classList?s.classList.add(e):s.className+=" "+e}function l(e){return t.matchMedia("(prefers-color-scheme"+e+")")}function n(){if(t.matchMedia&&"not all"!==l("").media)for(var e of a)if(l(":"+e).matches)return e;return"light"}r(c=e?e:c),t.__NUXT_COLOR_MODE__={preference:o,value:c,getColorScheme:n,addClass:r,removeClass:function(e){e=""+e;s.classList?s.classList.remove(e):s.className=s.className.replace(new RegExp(e,"g"),"")}}}()</script><noscript data-n-head="1" data-hid="gtm-noscript" data-pbody="true"><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NMKVBMV&" height="0" width="0" style="display:none;visibility:hidden" title="gtm"></iframe></noscript><div id="__nuxt"><style>#__nuxt,body,html{background:var(--primary-color);width:100%;height:100%;display:flex;justify-content:center;align-items:center;margin:0;padding:0}.spinner{width:40px;height:40px;background-color:var(--divider-light-color);border-radius:100%;-webkit-animation:sk-scaleout 1s infinite ease-in-out;animation:sk-scaleout 1s infinite ease-in-out}@-webkit-keyframes sk-scaleout{0%{-webkit-transform:scale(0)}100%{-webkit-transform:scale(1);opacity:0}}@keyframes sk-scaleout{0%{-webkit-transform:scale(0);transform:scale(0)}100%{-webkit-transform:scale(1);transform:scale(1);opacity:0}}</style><div class="spinner">  <div class="double-bounce1"></div>  <div class="double-bounce2"></div></div></div><script>window.__NUXT__={config:{clientVersion:"2.2.1",_app:{basePath:"/",assetsPath:"/_nuxt/",cdnURL:null}}}</script>
   <script src="/_nuxt/d0c2b45.modern.js" type="module"></script><script src="/_nuxt/07c0d20.modern.js" type="module"></script><script src="/_nuxt/a64c157.modern.js" type="module"></script><script src="/_nuxt/67f07ff.modern.js" type="module"></script><script src="/_nuxt/65d1dfe.js" nomodule></script><script src="/_nuxt/0e1e916.js" nomodule></script><script src="/_nuxt/8abf657.js" nomodule></script><script src="/_nuxt/52680d5.js" nomodule></script><script>!function(){var t,e=document,n=e.createElement("script");!("noModule"in n)&&"onbeforeload"in n&&(t=!1,e.addEventListener("beforeload",function(e){if(e.target===n)t=!0;else if(!e.target.hasAttribute("nomodule")||!t)return;e.preventDefault()},!0),n.type="module",n.src=".",e.head.appendChild(n),n.remove())}()</script></body>
+  <script>
+    // initialize
+
+    // TODO not work
+    // window.__TAURI__.event.listen('hopp_set_config', (config) => {
+    //   console.log('config', config);
+    // });
+
+    window.__hopp_init = function (config) {
+      const key = 'settings';
+      let settings;
+      // {"syncCollections":true,"syncHistory":true,"syncEnvironments":true,"PROXY_ENABLED":true,"PROXY_URL":"http://127.0.0.1:9090","EXTENSIONS_ENABLED":false,"URL_EXCLUDES":{"auth":true,"httpUser":true,"http…
+      if (localStorage.getItem(key)) {
+        settings = JSON.parse(localStorage.getItem(key))
+      } else {
+        settings;
+      }
+
+      const proxySet = settings.PROXY_ENABLED === true && settings.PROXY_URL === config.backendProxy;
+
+      // TODO hack
+      if (proxySet) {
+        return;
+      }
+      settings.PROXY_ENABLED = true;
+      settings.PROXY_URL = config.backendProxy;
+      localStorage.setItem(key, JSON.stringify(settings))
+      location.reload();
+    };
+  </script>
 </html>

@@ -4,32 +4,25 @@
 )]
 
 use tokio::runtime::Runtime;
+use env_logger;
+use log;
 
 mod proxy;
-
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
-fn hopp_tauri() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
-}
+mod hopp;
 
 fn main() {
+    env_logger::init();
+
     let rt = Runtime::new().expect("failed to initialize tokio rt");
 
-    rt.spawn(async {
-        let (addr, start) = proxy::listen();
+    let (addr, start) = rt.block_on(async {
+        proxy::listen()
+    });
 
-        println!("addr {:}", addr);
-
+    rt.spawn(async move {
+        log::debug!("addr {:}", addr);
         start.await;
     });
 
-    hopp_tauri()
+    hopp::tauri(&addr);
 }

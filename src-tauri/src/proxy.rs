@@ -1,17 +1,17 @@
 use anyhow::Result;
+use base64;
 use futures;
 use hyper::header::HeaderName;
 use hyper::{self, body::Buf, http::Method};
+use log;
 use serde;
 use serde_json;
 use std::collections::HashMap;
 use std::default::Default;
 use std::env;
-use std::str::FromStr;
 use std::string::String;
 use std::{convert::Infallible, net::SocketAddr};
 use url::Url;
-use base64;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 struct HoppAuth {
@@ -22,15 +22,15 @@ struct HoppAuth {
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct HoppRequest {
-  body: String,
+  body: Option<String>,
   url: String,
   method: String,
-  access_token: String,
-  auth: HoppAuth,
-  wants_binary: bool,
+  access_token: Option<String>,
+  auth: Option<HoppAuth>,
+  wants_binary: Option<bool>,
   headers: HashMap<String, String>,
-  data: String,
   params: HashMap<String, String>,
+  data: Option<String>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
@@ -44,9 +44,11 @@ struct HoppResponse {
   headers: Option<HashMap<String, String>>,
 }
 
+
 async fn routes(req: hyper::Request<hyper::Body>) -> Result<hyper::Response<hyper::Body>> {
   match handle_req(req).await {
     Err(e) => {
+      log::debug!("error: {:?}", e);
       // handle unexpected error
       let mut hopp_resp = HoppResponse::default();
       hopp_resp.success = false;
@@ -75,6 +77,7 @@ async fn request_with_err(hopp_req: HoppRequest) -> HoppResponse {
 }
 
 async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
+  log::debug!("request params: {:?}", hopp_req);
   let mut url = Url::parse(hopp_req.url.as_str()).unwrap();
   let req_method = Method::from_bytes(&hopp_req.method.as_bytes())?;
 
@@ -96,20 +99,42 @@ async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
       h.insert(key, val.parse().unwrap());
     }
 
-    if h.get("content-length").is_none() {
-      h.insert("content-length", hopp_req.data.len().to_string().parse().unwrap());
+    if h.get("content-length").is_none() && hopp_req.data.is_some() {
+      let len = hopp_req.data.map(|d| d.len()).unwrap();
+      h.insert("content-length", len.to_string().parse().unwrap());
     }
   }
 
-  let req = req.body(hyper::Body::from(hopp_req.body))?;
+  let req = req.body(hyper::Body::from(hopp_req.body.unwrap_or("".to_string())))?;
 
-  let cli = hyper::Client::new();
-
-  let mut resp = cli.request(req).await?;
+  let mut resp = match url.scheme() {
+    "https" => {
+      let connector = hyper_tls::HttpsConnector::new();
+      let cli = hyper::Client::builder().build::<_, hyper::Body>(connector);
+      cli.request(req).await?
+    }
+    _schema => {
+      let cli = hyper::Client::new();
+      cli.request(req).await?
+    }
+  };
 
   let mut hopp_resp = HoppResponse::default();
+  hopp_resp.success = true;
+  hopp_resp.status = Some(resp.status().as_u16());
+  hopp_resp.status_text = Some(resp.status().as_str().to_string());
 
-  if hopp_req.wants_binary {
+  {
+    let mut headers = HashMap::new();
+    let h = resp.headers();
+
+    for (key, value) in h {
+      headers.insert(key.to_string(), value.to_str()?.to_string());
+    }
+    hopp_resp.headers = Some(headers);
+  }
+
+  if hopp_req.wants_binary.is_some() && hopp_req.wants_binary.unwrap() {
     hopp_resp.is_binary = Some(true);
     let body = resp.body_mut();
     let body = hyper::body::aggregate(body).await?;
@@ -128,6 +153,8 @@ async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
 
 async fn handle_req(mut req: hyper::Request<hyper::Body>) -> Result<hyper::Response<hyper::Body>> {
   let method = req.method().clone();
+
+  log::debug!("request, method: {}", method);
 
   let mut resp = hyper::Response::builder();
 
@@ -160,6 +187,8 @@ async fn handle_req(mut req: hyper::Request<hyper::Body>) -> Result<hyper::Respo
   let hopp_resp = request_with_err(hopp_req).await;
 
   let data = serde_json::to_string(&hopp_resp)?;
+
+  log::debug!("response, hopp_resp: {:?}", hopp_resp);
 
   let resp = resp.body(hyper::Body::from(data))?;
 

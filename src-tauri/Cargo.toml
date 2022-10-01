@@ -18,11 +18,15 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.1", features = ["api-all"] }
 hyper = { version = "0.14", features= ["server", "http1", "client", "tcp"] }
+hyper-tls = {version = "0.5"}
 tokio = { version = "1.21" }
 futures = { version = "0.3" }
 anyhow = { version = "1" }
 url = { version = "2" }
 base64 = {version = "0.13"}
+log = {version = "0.4"}
+env_logger = {version = "0.9"}
+lazy_static = {version = "1"}
 
 
 [features]
