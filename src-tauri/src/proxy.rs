@@ -210,7 +210,7 @@ pub fn listen() -> (SocketAddr, impl futures::Future<Output = ()>) {
 
   let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
-  let make_service = hyper::service::make_service_fn(|conn| async {
+  let make_service = hyper::service::make_service_fn(|_conn| async {
     Ok::<_, Infallible>(hyper::service::service_fn(routes))
   });
 

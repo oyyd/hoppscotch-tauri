@@ -29,8 +29,8 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.oyyd.net",
-      "longDescription": "",
+      "identifier": "org.oyyd.app",
+      "longDescription": "Hoppscotch and a rust proxy server bundled with tauri.",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
