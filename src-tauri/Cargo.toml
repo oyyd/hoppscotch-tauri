@@ -1,7 +1,7 @@
 [package]
 name = "hoppscotch-tauri"
 version = "0.1.0"
-description = "Hoppscotch and a rust proxy server bundled with tauri."
+description = "Hoppscotch and a Rust proxy server bundled with tauri."
 authors = ["Ouyang Yadong <oyydoibh@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/oyyd/hoppscotch-tauri"

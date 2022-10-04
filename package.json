@@ -1,7 +1,7 @@
 {
   "name": "hoppscotch-tauri",
   "version": "0.1.0",
-  "description": "Hoppscotch and a rust proxy server bundled with tauri.",
+  "description": "Hoppscotch and a Rust proxy server bundled with tauri.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
