@@ -13,11 +13,42 @@
     // window.__TAURI__.event.listen('hopp_set_config', (config) => {
     //   console.log('config', config);
     // });
-
     window.__hopp_init = function (config) {
       const key = 'settings';
+
+      function initConfig() {
+        if (localStorage.getItem(key)) {
+          return;
+        }
+
+        const kKeys = {
+          settings: `{"syncCollections":true,"syncHistory":true,"syncEnvironments":true,"PROXY_ENABLED":false,"PROXY_URL":"https://proxy.hoppscotch.io/","EXTENSIONS_ENABLED":false,"URL_EXCLUDES":{"auth":true,"httpUser":true,"httpPassword":true,"bearerToken":true,"oauth2Token":true},"THEME_COLOR":"indigo","BG_COLOR":"system","TELEMETRY_ENABLED":true,"EXPAND_NAVIGATION":true,"SIDEBAR":true,"SIDEBAR_ON_LEFT":true,"ZEN_MODE":false,"FONT_SIZE":"small","COLUMN_LAYOUT":true}`,
+          collectionsGraphql: `[]`,
+          globalEnv: `[]`,
+          SSERequest: `{"endpoint":"https://express-eventsource.herokuapp.com/events","eventType":"data"}`,
+          cookiesAllowed: 'yes',
+          MQTTRequest: `{"endpoint":"wss://test.mosquitto.org:8081"}`,
+          collections: `[]`,
+          history: `[]`,
+          localState: `{}`,
+          environments: `[]`,
+          locale: `en`,
+          WebsocketRequest: `{"endpoint":"wss://echo-websocket.hoppscotch.io","protocols":[]}`,
+          graphqlHistory: `[]`,
+          'nuxt-color-mode': `system`,
+          restRequest: `{"v":"1","endpoint":"https://echo.hoppscotch.io","name":"Untitled request","params":[],"headers":[],"method":"GET","auth":{"authType":"none","authActive":true,"addTo":"Headers","key":"","value":""},"preRequestScript":"","testScript":"","body":{"contentType":null,"body":null}}`,
+          SocketIORequest: `{"endpoint":"wss://echo-socketio.hoppscotch.io","path":"/socket.io","version":"v4"}`,
+          selectedEnvIndex: `-1`,
+        };
+
+        Object.keys(kKeys).forEach(key => {
+          localStorage.setItem(key, kKeys[key]);
+        });
+      }
+
+      initConfig();
+
       let settings;
-      // {"syncCollections":true,"syncHistory":true,"syncEnvironments":true,"PROXY_ENABLED":true,"PROXY_URL":"http://127.0.0.1:9090","EXTENSIONS_ENABLED":false,"URL_EXCLUDES":{"auth":true,"httpUser":true,"http…
       if (localStorage.getItem(key)) {
         settings = JSON.parse(localStorage.getItem(key))
       } else {
