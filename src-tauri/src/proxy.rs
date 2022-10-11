@@ -70,6 +70,7 @@ async fn request_with_err(hopp_req: HoppRequest) -> HoppResponse {
     Err(e) => {
       let mut hopp_resp = HoppResponse::default();
 
+      log::debug!("request failed, err: {:?}", e);
       hopp_resp.success = false;
       hopp_resp.data = Some(e.to_string());
       hopp_resp
@@ -116,6 +117,8 @@ async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
 
   let req = req.body(hyper::Body::from(hopp_req.body.unwrap_or("".to_string())))?;
 
+  log::debug!("requesting..");
+
   let mut resp = match url.scheme() {
     "https" => {
       let connector = hyper_tls::HttpsConnector::new();
@@ -142,6 +145,7 @@ async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
     }
     hopp_resp.headers = Some(headers);
   }
+  log::debug!("collect body..");
 
   if hopp_req.wants_binary.is_some() && hopp_req.wants_binary.unwrap() {
     hopp_resp.is_binary = Some(true);

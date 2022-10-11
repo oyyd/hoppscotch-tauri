@@ -23,7 +23,7 @@ pub fn tauri(proxy_addr: &SocketAddr) {
         backend_proxy: format!("http://{}", addr.to_string()),
       };
       let content = serde_json::to_string(&config).unwrap();
-      let script = format!("__hopp_init({});", content.as_str());
+      let script = format!("window.__hopp_init({});", content.as_str());
       // TODO not work
       // window.emit("hopp_set_config", config).unwrap();
       window.eval(script.as_str()).unwrap();
