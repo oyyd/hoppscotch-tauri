@@ -45,7 +45,6 @@ struct HoppResponse {
   headers: Option<HashMap<String, String>>,
 }
 
-
 async fn routes(req: hyper::Request<hyper::Body>) -> Result<hyper::Response<hyper::Body>> {
   match handle_req(req).await {
     Err(e) => {
@@ -86,7 +85,7 @@ async fn read_body_to_end(body: &mut hyper::Body) -> Result<Vec<u8>> {
   Ok(body)
 }
 
-async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
+async fn request(mut hopp_req: HoppRequest) -> Result<HoppResponse> {
   log::debug!("request params: {:?}", hopp_req);
   let mut url = Url::parse(hopp_req.url.as_str()).unwrap();
   let req_method = Method::from_bytes(&hopp_req.method.as_bytes())?;
@@ -110,23 +109,32 @@ async fn request(hopp_req: HoppRequest) -> Result<HoppResponse> {
     }
 
     if h.get("content-length").is_none() && hopp_req.data.is_some() {
-      let len = hopp_req.data.map(|d| d.len()).unwrap();
+      let len = hopp_req.data.as_mut().map(|d| d.len()).unwrap();
       h.insert("content-length", len.to_string().parse().unwrap());
     }
   }
 
-  let req = req.body(hyper::Body::from(hopp_req.body.unwrap_or("".to_string())))?;
+  let data = hopp_req.data.take();
+
+  let body = match data.is_some() {
+    true => hyper::Body::from(data.unwrap()),
+    false => hyper::Body::empty()
+  };
+
+  let req = req.body(body)?;
 
   log::debug!("requesting..");
+
+  let mut cli_builder = hyper::Client::builder();
 
   let mut resp = match url.scheme() {
     "https" => {
       let connector = hyper_tls::HttpsConnector::new();
-      let cli = hyper::Client::builder().build::<_, hyper::Body>(connector);
+      let cli = cli_builder.build::<_, hyper::Body>(connector);
       cli.request(req).await?
     }
     _schema => {
-      let cli = hyper::Client::new();
+      let cli = cli_builder.build_http();
       cli.request(req).await?
     }
   };
