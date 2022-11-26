@@ -7,12 +7,6 @@ struct HoppConfig {
   backend_proxy: String,
 }
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-// #[tauri::command]
-// fn get_hopp_config() -> HoppConfig {
-//   HoppConfig::default()
-// }
-
 pub fn tauri(proxy_addr: &SocketAddr) {
   let addr = proxy_addr.clone();
   let context = tauri::generate_context!();
@@ -28,7 +22,6 @@ pub fn tauri(proxy_addr: &SocketAddr) {
       // window.emit("hopp_set_config", config).unwrap();
       window.eval(script.as_str()).unwrap();
     })
-    // .invoke_handler(tauri::generate_handler![get_hopp_config])
     .run(context)
     .expect("error while running tauri application");
 }

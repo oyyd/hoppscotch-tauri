@@ -1,6 +1,10 @@
 # hoppscotch-tauri
 
-WIP
+hoppscotch-tauri is a desktop requests sender that bundles [hoppscotch](https://github.com/hoppscotch/hoppscotch) and a Rust proxy server with [tauri](https://tauri.app).
+
+## Download
+
+[https://github.com/oyyd/hoppscotch-tauri/releases](https://github.com/oyyd/hoppscotch-tauri/releases)
 
 ## Development
 
