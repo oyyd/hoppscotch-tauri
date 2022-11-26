@@ -1,8 +1,8 @@
 # hoppscotch-tauri
 
-![screenshot](./imgs/screenshot.png)
-
 hoppscotch-tauri is a desktop requests sender that bundles [hoppscotch](https://github.com/hoppscotch/hoppscotch) and a Rust proxy server with [tauri](https://tauri.app).
+
+<img src="./imgs/screenshot.png" style="width: 600px"></img>
 
 ## Download
 
