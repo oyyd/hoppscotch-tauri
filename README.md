@@ -1,6 +1,6 @@
 # hoppscotch-tauri
 
-![github_ci_status](https://github.com/oyyd/hoppscotch-tauri/workflows/CI/badge.svg)
+<!-- ![github_ci_status](https://github.com/oyyd/hoppscotch-tauri/workflows/CI/badge.svg) -->
 
 hoppscotch-tauri is a desktop requests sender that bundles [hoppscotch](https://github.com/hoppscotch/hoppscotch) and a Rust proxy server with [tauri](https://tauri.app).
 
