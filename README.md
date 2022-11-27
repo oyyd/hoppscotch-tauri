@@ -2,11 +2,17 @@
 
 hoppscotch-tauri is a desktop requests sender that bundles [hoppscotch](https://github.com/hoppscotch/hoppscotch) and a Rust proxy server with [tauri](https://tauri.app).
 
-<img src="./imgs/screenshot.png" style="width: 600px"></img>
+<img src="./imgs/screenshot.png" style="width: 600px; border-radius: 4x;"></img>
 
 ## Download
 
 [https://github.com/oyyd/hoppscotch-tauri/releases](https://github.com/oyyd/hoppscotch-tauri/releases)
+
+|Platform|Notarized?|Download|
+|---|---|---|
+|Mac|✅|[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.1/hoppscotch-tauri_0.1.1_x64_darwin.dmg)|
+|Windows|❌|[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.1/hoppscotch-tauri_0.1.1_x64_win32.msi)|
+|Linux||[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.1/hoppscotch-tauri_0.1.1_amd64_linux.deb)|
 
 ## Development
 
