@@ -125,7 +125,7 @@ async fn request(mut hopp_req: HoppRequest) -> Result<HoppResponse> {
 
   log::debug!("requesting..");
 
-  let mut cli_builder = hyper::Client::builder();
+  let cli_builder = hyper::Client::builder();
 
   let mut resp = match url.scheme() {
     "https" => {
