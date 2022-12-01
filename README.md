@@ -12,9 +12,9 @@ hoppscotch-tauri is a desktop requests sender that bundles [hoppscotch](https://
 
 |Platform|Notarized?|Download|
 |---|---|---|
-|Mac|✅|[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.1/hoppscotch-tauri_0.1.1_x64_darwin.dmg)|
-|Windows|❌|[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.1/hoppscotch-tauri_0.1.1_x64_win32.msi)|
-|Linux||[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.1/hoppscotch-tauri_0.1.1_amd64_linux.deb)|
+|Mac|✅|[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.2/hoppscotch-tauri_0.1.2_x64.dmg)|
+|Windows|❌|[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.2/hoppscotch-tauri_0.1.2_x64_en-US.msi)|
+|Linux||[Link](https://github.com/oyyd/hoppscotch-tauri/releases/download/release-v0.1.2/hoppscotch-tauri_0.1.2_amd64.deb)|
 
 ## Development
 
