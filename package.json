@@ -1,6 +1,6 @@
 {
   "name": "hoppscotch-tauri",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Hoppscotch and a Rust proxy server bundled with tauri.",
   "main": "index.js",
   "scripts": {
